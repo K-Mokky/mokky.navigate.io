@@ -89,7 +89,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final lower = name.toLowerCase();
     if (lower.endsWith('.png')) return 'png';
     if (lower.endsWith('.webp')) return 'webp';
-    if (lower.endsWith('.gif')) return 'gif';
     return 'jpg';
   }
 
@@ -97,7 +96,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return switch (extension) {
       'png' => 'image/png',
       'webp' => 'image/webp',
-      'gif' => 'image/gif',
       _ => 'image/jpeg',
     };
   }

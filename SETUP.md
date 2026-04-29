@@ -24,7 +24,7 @@ Supabase 콘솔 → **Database → Replication** →
 `locations` 테이블을 Realtime 대상에 추가합니다.
 
 ### 2-4. 앱에 키 입력
-권장 방식은 실행 시 `--dart-define`으로 주입하는 것입니다:
+실행 시 `--dart-define`으로 주입합니다. 프로젝트 URL/publishable key를 소스에 직접 넣어 커밋하지 마세요.
 
 ```bash
 flutter run \
@@ -32,20 +32,7 @@ flutter run \
   --dart-define=SUPABASE_ANON_KEY=eyJhbGc...
 ```
 
-또는 `lib/config/supabase_config.dart`의 `defaultValue`를 수정할 수 있습니다:
-
-```dart
-static const String url = String.fromEnvironment(
-  'SUPABASE_URL',
-  defaultValue: 'https://xxxx.supabase.co',
-);
-static const String anonKey = String.fromEnvironment(
-  'SUPABASE_ANON_KEY',
-  defaultValue: 'eyJhbGc...',
-);
-```
-
-> 키는 Supabase 콘솔 → **Settings → API**에서 확인할 수 있습니다.
+> 키는 Supabase 콘솔 → **Settings → API**에서 확인할 수 있습니다. `anon`/`publishable` key는 클라이언트에 포함되는 공개 키지만, 저장소에는 실제 프로젝트 값을 커밋하지 않고 RLS 정책으로 접근을 제한합니다.
 
 ### 2-5. 회원가입 인증 메일 Redirect URL 설정
 

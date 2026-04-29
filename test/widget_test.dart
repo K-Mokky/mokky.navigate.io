@@ -3,14 +3,11 @@ import 'package:friend_tracker/config/supabase_config.dart';
 import 'package:friend_tracker/providers/settings_provider.dart';
 
 void main() {
-  test('Supabase 기본 설정이 앱 실행 가능 상태다', () {
-    expect(SupabaseConfig.url, 'https://buqhohpicditkcqdypab.supabase.co');
-    expect(
-      SupabaseConfig.anonKey,
-      'sb_publishable_nrTXbgVfh9kpiqO1ZnCrOw_FHgeT8j6',
-    );
+  test('Supabase 기본 설정은 소스에 실제 프로젝트 값을 포함하지 않는다', () {
+    expect(SupabaseConfig.url, isEmpty);
+    expect(SupabaseConfig.anonKey, isEmpty);
     expect(SupabaseConfig.authRedirectUrl, 'radar://auth-callback/');
-    expect(SupabaseConfig.isConfigured, isTrue);
+    expect(SupabaseConfig.isConfigured, isFalse);
   });
 
   test('근접 알림은 300m 진입 후 5km 이탈 시 재무장된다', () {

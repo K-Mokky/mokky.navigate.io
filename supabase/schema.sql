@@ -161,6 +161,58 @@ create unique index friendships_active_pair_unique_idx
   )
   where status in ('pending', 'accepted');
 
+-- 클라이언트가 RLS를 우회해 본인 row의 민감/불변 컬럼을 바꾸지 못하게 방어한다.
+create or replace function public.enforce_profile_update_guard()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if auth.uid() is not null and (
+    new.id <> old.id
+    or new.username <> old.username
+    or new.email is distinct from old.email
+    or new.created_at <> old.created_at
+  ) then
+    raise exception 'profile immutable fields cannot be changed';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_update_guard on public.profiles;
+create trigger profiles_update_guard
+  before update on public.profiles
+  for each row execute function public.enforce_profile_update_guard();
+
+-- 친구 요청 수락/거절 시에는 상태만 바뀌어야 한다.
+create or replace function public.enforce_friendship_update_guard()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.id <> old.id
+    or new.requester_id <> old.requester_id
+    or new.addressee_id <> old.addressee_id
+    or new.created_at <> old.created_at then
+    raise exception 'friendship immutable fields cannot be changed';
+  end if;
+
+  if old.status <> 'pending' and new.status <> old.status then
+    raise exception 'only pending friendship requests can change status';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists friendships_update_guard on public.friendships;
+create trigger friendships_update_guard
+  before update on public.friendships
+  for each row execute function public.enforce_friendship_update_guard();
+
 -- ─── friend_greetings ─────────────────────────────────────
 -- 300m 이내 친구에게 보내는 가벼운 인사 이벤트.
 -- 수신자는 Realtime 구독으로 즉시 앱 내부/로컬 알림을 받는다.
@@ -216,6 +268,101 @@ as $$
   );
 $$;
 
+create or replace function public.is_recording_session_owner(
+  p_session_id uuid,
+  p_user_id uuid,
+  p_room_id uuid
+)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.recording_sessions s
+    where s.id = p_session_id
+      and s.user_id = p_user_id
+      and (p_room_id is null or s.room_id = p_room_id)
+  );
+$$;
+
+-- 친구 검색은 profiles 테이블을 직접 전체 공개하지 않고 공개 필드만 반환한다.
+create or replace function public.search_profiles(p_query text)
+returns table (
+  id uuid,
+  username text,
+  display_name text,
+  avatar_url text,
+  is_sharing_location boolean,
+  created_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  normalized_query text := left(regexp_replace(trim(coalesce(p_query, '')), '\s+', ' ', 'g'), 32);
+  escaped_query text;
+begin
+  if auth.uid() is null or length(normalized_query) < 2 then
+    return;
+  end if;
+
+  escaped_query := replace(
+    replace(
+      replace(normalized_query, '\', '\\'),
+      '%',
+      '\%'
+    ),
+    '_',
+    '\_'
+  );
+
+  return query
+  select
+    p.id,
+    p.username,
+    p.display_name,
+    p.avatar_url,
+    p.is_sharing_location,
+    p.created_at
+  from public.profiles p
+  where p.id <> auth.uid()
+    and p.username ilike '%' || escaped_query || '%' escape '\'
+  order by p.username
+  limit 20;
+end;
+$$;
+
+-- 기록방 멤버 표시는 연락처(email/phone)를 제외한 공개 필드만 반환한다.
+create or replace function public.get_room_members_public(p_room_id uuid)
+returns table (
+  id uuid,
+  username text,
+  display_name text,
+  avatar_url text,
+  is_sharing_location boolean,
+  created_at timestamptz
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    p.id,
+    p.username,
+    p.display_name,
+    p.avatar_url,
+    p.is_sharing_location,
+    p.created_at
+  from public.room_members m
+  join public.profiles p on p.id = m.user_id
+  where m.room_id = p_room_id
+    and public.is_room_member(p_room_id, auth.uid())
+  order by m.joined_at;
+$$;
+
 create or replace function public.join_room_by_code(p_invite_code text)
 returns uuid
 language plpgsql
@@ -224,11 +371,20 @@ set search_path = public
 as $$
 declare
   target_room_id uuid;
+  normalized_code text := upper(trim(coalesce(p_invite_code, '')));
 begin
+  if auth.uid() is null then
+    raise exception 'login required';
+  end if;
+
+  if normalized_code !~ '^[A-Z0-9]{6,32}$' then
+    raise exception 'invalid invite code';
+  end if;
+
   select id
   into target_room_id
   from public.recording_rooms
-  where invite_code = upper(trim(p_invite_code))
+  where invite_code = normalized_code
     and expires_at > now();
 
   if target_room_id is null then

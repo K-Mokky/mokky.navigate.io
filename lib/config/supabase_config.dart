@@ -1,19 +1,15 @@
 import 'package:flutter/foundation.dart';
 
 class SupabaseConfig {
-  // Supabase 프로젝트 키.
-  //
-  // 실행 시 다음처럼 주입할 수 있습니다:
+  // Supabase 프로젝트 설정은 소스에 커밋하지 않고 dart-define으로 주입합니다.
   // flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
-  //
-  // 로컬에서 빠르게 확인하려면 아래 defaultValue를 직접 바꿔도 됩니다.
   static const String url = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://buqhohpicditkcqdypab.supabase.co',
+    defaultValue: '',
   );
   static const String anonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: 'sb_publishable_nrTXbgVfh9kpiqO1ZnCrOw_FHgeT8j6',
+    defaultValue: '',
   );
   static String get authRedirectUrl {
     const configured = String.fromEnvironment('SUPABASE_AUTH_REDIRECT_URL');
@@ -27,7 +23,9 @@ class SupabaseConfig {
   }
 
   static bool get isConfigured =>
-      url.startsWith('https://') && anonKey != 'YOUR_SUPABASE_ANON_KEY';
+      url.startsWith('https://') &&
+      Uri.tryParse(url)?.isAbsolute == true &&
+      anonKey.isNotEmpty;
 
   // 친구 근접 알림/인사 가능 거리 (미터)
   static const double proximityThresholdMeters = 300.0;

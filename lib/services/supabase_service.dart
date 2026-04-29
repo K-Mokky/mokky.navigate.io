@@ -1,7 +1,7 @@
 import 'dart:typed_data';
+import 'dart:math';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:uuid/uuid.dart';
 import '../config/supabase_config.dart';
 import '../models/user_profile.dart';
 import '../models/location_point.dart';
@@ -11,6 +11,19 @@ import '../models/recording_session.dart';
 
 class SupabaseService {
   static SupabaseClient get _client => Supabase.instance.client;
+  static const int _maxAvatarBytes = 2 * 1024 * 1024;
+  static const Set<String> _allowedAvatarExtensions = {
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+  };
+  static const Set<String> _allowedAvatarContentTypes = {
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+  };
+  static const String _inviteAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
   // ─── Auth ───────────────────────────────────────────────────────────────────
 
@@ -82,7 +95,18 @@ class SupabaseService {
   static Future<void> updateProfile(Map<String, dynamic> updates) async {
     final userId = currentUser?.id;
     if (userId == null) return;
-    await _client.from('profiles').update(updates).eq('id', userId);
+    final safeUpdates = Map<String, dynamic>.fromEntries(
+      updates.entries.where(
+        (entry) => const {
+          'display_name',
+          'avatar_url',
+          'phone',
+          'is_sharing_location',
+        }.contains(entry.key),
+      ),
+    );
+    if (safeUpdates.isEmpty) return;
+    await _client.from('profiles').update(safeUpdates).eq('id', userId);
   }
 
   static Future<String> uploadAvatar({
@@ -94,6 +118,9 @@ class SupabaseService {
     if (userId == null) {
       throw StateError('로그인이 필요합니다.');
     }
+    if (bytes.isEmpty || bytes.length > _maxAvatarBytes) {
+      throw ArgumentError('프로필 사진은 2MB 이하만 업로드할 수 있습니다.');
+    }
 
     final normalizedExtension =
         extension.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), '');
@@ -102,6 +129,11 @@ class SupabaseService {
         : normalizedExtension == 'jpeg'
             ? 'jpg'
             : normalizedExtension;
+    final safeContentType = contentType.toLowerCase();
+    if (!_allowedAvatarExtensions.contains(safeExtension) ||
+        !_allowedAvatarContentTypes.contains(safeContentType)) {
+      throw ArgumentError('지원하지 않는 프로필 사진 형식입니다.');
+    }
     final path = '$userId/avatar.$safeExtension';
 
     await _client.storage.from('avatars').uploadBinary(
@@ -119,13 +151,13 @@ class SupabaseService {
   }
 
   static Future<List<UserProfile>> searchUsers(String query) async {
-    final userId = currentUser?.id ?? '';
-    final data = await _client
-        .from('profiles')
-        .select('id, username, display_name, avatar_url, created_at')
-        .ilike('username', '%$query%')
-        .neq('id', userId)
-        .limit(20);
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.length < 2) return [];
+
+    final data = await _client.rpc(
+      'search_profiles',
+      params: {'p_query': normalizedQuery},
+    );
     return (data as List).map((e) => UserProfile.fromJson(e)).toList();
   }
 
@@ -353,15 +385,12 @@ class SupabaseService {
   }
 
   static Future<List<UserProfile>> getRoomMembers(String roomId) async {
-    final data = await _client
-        .from('room_members')
-        .select('profile:profiles(*)')
-        .eq('room_id', roomId)
-        .order('joined_at');
+    final data = await _client.rpc(
+      'get_room_members_public',
+      params: {'p_room_id': roomId},
+    );
 
-    return (data as List)
-        .map((row) => UserProfile.fromJson(row['profile']))
-        .toList();
+    return (data as List).map((row) => UserProfile.fromJson(row)).toList();
   }
 
   static Future<List<LocationPoint>> getRoomLocations(String roomId) async {
@@ -449,6 +478,10 @@ class SupabaseService {
   }
 
   static String _inviteCode() {
-    return const Uuid().v4().split('-').first.toUpperCase();
+    final random = Random.secure();
+    return List.generate(
+      12,
+      (_) => _inviteAlphabet[random.nextInt(_inviteAlphabet.length)],
+    ).join();
   }
 }

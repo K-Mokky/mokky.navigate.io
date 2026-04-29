@@ -42,6 +42,9 @@ Supabase SQL Editor에서 다음 순서로 실행하세요.
 1. `supabase/schema.sql`
 2. `supabase/rls_policies.sql`
 
+실제 Supabase URL과 publishable/anon key는 `--dart-define`으로만 주입하고 저장소에는 커밋하지 않습니다.
+친구 검색과 기록방 멤버 조회는 공개 프로필 필드만 반환하도록 SQL RPC/RLS가 분리되어 있습니다.
+
 Supabase Authentication → URL Configuration에는 웹 실행 주소를 등록하세요.
 로컬 웹 개발은 `http://localhost:*` 또는 실제 Chrome 실행 URL을, 배포 후에는 배포 도메인을
 `Site URL`/`Redirect URLs`에 추가합니다. iOS도 함께 쓸 경우 기존 `radar://auth-callback/`도 유지하세요.

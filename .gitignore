@@ -10,6 +10,9 @@
 .svn/
 migrate_working_dir/
 .omx/
+.env
+.env.*
+!.env.example
 
 # IntelliJ related
 *.iml

@@ -9,11 +9,31 @@ drop policy if exists "profiles_select" on public.profiles;
 drop policy if exists "profiles_insert" on public.profiles;
 drop policy if exists "profiles_update" on public.profiles;
 
--- 모든 인증 사용자가 프로필 조회 가능 (친구 검색용)
+-- 프로필 원본 테이블은 본인/친구/내게 온 요청자로 제한한다.
+-- 친구 검색/기록방 멤버 목록은 연락처를 제외한 security definer RPC가 공개 필드만 반환한다.
 create policy "profiles_select"
   on public.profiles for select
   to authenticated
-  using (true);
+  using (
+    id = auth.uid()
+    or exists (
+      select 1
+      from public.friendships f
+      where f.status = 'accepted'
+        and (
+          (f.requester_id = auth.uid() and f.addressee_id = profiles.id)
+          or
+          (f.addressee_id = auth.uid() and f.requester_id = profiles.id)
+        )
+    )
+    or exists (
+      select 1
+      from public.friendships f
+      where f.status = 'pending'
+        and f.addressee_id = auth.uid()
+        and f.requester_id = profiles.id
+    )
+  );
 
 -- 본인 프로필만 수정 가능
 create policy "profiles_insert"
@@ -70,8 +90,22 @@ create policy "locations_insert"
   with check (
     user_id = auth.uid()
     and (
-      current_room_id is null
-      or public.is_room_member(current_room_id, auth.uid())
+      (
+        current_room_id is null
+        and current_session_id is null
+      )
+      or (
+        current_room_id is not null
+        and public.is_room_member(current_room_id, auth.uid())
+        and (
+          current_session_id is null
+          or public.is_recording_session_owner(
+            current_session_id,
+            auth.uid(),
+            current_room_id
+          )
+        )
+      )
     )
   );
 
@@ -82,8 +116,22 @@ create policy "locations_update"
   with check (
     user_id = auth.uid()
     and (
-      current_room_id is null
-      or public.is_room_member(current_room_id, auth.uid())
+      (
+        current_room_id is null
+        and current_session_id is null
+      )
+      or (
+        current_room_id is not null
+        and public.is_room_member(current_room_id, auth.uid())
+        and (
+          current_session_id is null
+          or public.is_recording_session_owner(
+            current_session_id,
+            auth.uid(),
+            current_room_id
+          )
+        )
+      )
     )
   );
 
@@ -216,8 +264,18 @@ create policy "location_history_insert"
   with check (
     user_id = auth.uid()
     and (
-      room_id is null
-      or public.is_room_member(room_id, auth.uid())
+      (
+        room_id is null
+        and session_id is null
+      )
+      or (
+        room_id is not null
+        and public.is_room_member(room_id, auth.uid())
+        and (
+          session_id is null
+          or public.is_recording_session_owner(session_id, auth.uid(), room_id)
+        )
+      )
     )
   );
 
@@ -312,6 +370,7 @@ create policy "avatars_owner_insert"
   with check (
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
+    and storage.filename(name) ~ '^avatar\.(jpg|jpeg|png|webp)$'
   );
 
 create policy "avatars_owner_update"
@@ -324,6 +383,7 @@ create policy "avatars_owner_update"
   with check (
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
+    and storage.filename(name) ~ '^avatar\.(jpg|jpeg|png|webp)$'
   );
 
 create policy "avatars_owner_delete"

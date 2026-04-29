@@ -71,8 +71,8 @@ class _MissingSupabaseConfigApp extends StatelessWidget {
                   SizedBox(height: 12),
                   Text(
                     'flutter run --dart-define=SUPABASE_URL=... '
-                    '--dart-define=SUPABASE_ANON_KEY=... 형식으로 실행하거나 '
-                    'lib/config/supabase_config.dart의 기본값을 설정해주세요.',
+                    '--dart-define=SUPABASE_ANON_KEY=... 형식으로 실행해주세요. '
+                    '프로젝트 URL과 publishable key는 소스에 커밋하지 않습니다.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white60, height: 1.5),
                   ),
