@@ -18,7 +18,7 @@ class AppLogo extends StatelessWidget {
     final logo = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: Image.asset(
-        'assets/branding/app_icon.png',
+        'assets/branding/navigateIcon.png',
         width: size,
         height: size,
         fit: BoxFit.cover,
