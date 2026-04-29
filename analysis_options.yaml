@@ -1,0 +1,19 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # 미사용 import 경고
+    avoid_unused_constructor_parameters: true
+    # prefer const 생성자
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    # null safety
+    avoid_null_checks_in_equality_operators: true
+    unnecessary_null_checks: true
+
+analyzer:
+  errors:
+    # 미사용 변수는 warning으로
+    unused_local_variable: warning
+    unused_import: warning
+    dead_code: warning

@@ -1,0 +1,45 @@
+<!--
+  ios/Runner/Info.plist 에 아래 키들을 추가하세요.
+  flutter create 후 자동 생성된 Info.plist의 <dict> 안에 붙여넣으면 됩니다.
+-->
+
+<!-- 위치 권한 설명 (iOS 필수) -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>친구들에게 내 위치를 실시간으로 공유하기 위해 위치 정보가 필요합니다.</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>앱이 백그라운드에서도 위치를 공유하려면 항상 허용이 필요합니다.</string>
+
+<key>NSLocationAlwaysUsageDescription</key>
+<string>앱이 백그라운드에서도 위치를 공유하려면 항상 허용이 필요합니다.</string>
+
+<!-- 백그라운드 위치 업데이트 모드 -->
+<key>UIBackgroundModes</key>
+<array>
+  <string>location</string>
+  <string>fetch</string>
+</array>
+
+<!-- FaceTime URL 스킴 허용 -->
+<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>facetime</string>
+  <string>facetime-audio</string>
+  <string>radar</string>
+</array>
+
+<!-- 기록방 초대 링크 예: radar://room/AB12CD34 -->
+<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleURLName</key>
+    <string>com.yourcompany.friend-tracker.room</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>radar</string>
+    </array>
+  </dict>
+</array>
+
+<!-- 알림 권한 (flutter_local_notifications) -->
+<!-- 별도 설정 불필요 - 런타임에 권한 요청 -->
