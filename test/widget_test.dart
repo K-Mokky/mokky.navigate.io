@@ -42,6 +42,15 @@ void main() {
     expect(File('assets/fonts/NotoSansKR.ttf').existsSync(), isTrue);
   });
 
+  test('앱 시작 오류는 흰 화면 대신 오류 화면으로 대체된다', () {
+    final mainSource = File('lib/main.dart').readAsStringSync();
+
+    expect(mainSource, contains('runZonedGuarded'));
+    expect(mainSource, contains('FlutterError.reportError'));
+    expect(mainSource, contains('앱을 시작하지 못했습니다'));
+    expect(mainSource, contains('_StartupStatusApp'));
+  });
+
   test('인사 이벤트는 서버 RPC와 RLS로 발신자 조작을 막는다', () {
     final schema = File('supabase/schema.sql').readAsStringSync();
     final policies = File('supabase/rls_policies.sql').readAsStringSync();
