@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "if [ ! -d \"$HOME/flutter\" ]; then git clone https://github.com/flutter/flutter.git -b stable --depth 1 \"$HOME/flutter\"; fi && \"$HOME/flutter/bin/flutter\" config --enable-web && \"$HOME/flutter/bin/flutter\" pub get",
+  "installCommand": "if [ ! -x \"$HOME/flutter/bin/flutter\" ] || ! \"$HOME/flutter/bin/flutter\" --version | grep -q \"Flutter 3.24.5\"; then rm -rf \"$HOME/flutter\" && git clone https://github.com/flutter/flutter.git -b 3.24.5 --depth 1 \"$HOME/flutter\"; fi && \"$HOME/flutter/bin/flutter\" config --enable-web && \"$HOME/flutter/bin/flutter\" pub get",
   "buildCommand": "\"$HOME/flutter/bin/flutter\" build web --release --web-renderer html --no-web-resources-cdn --csp --pwa-strategy=none --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY",
   "outputDirectory": "build/web",
   "rewrites": [

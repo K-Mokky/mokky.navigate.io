@@ -77,6 +77,7 @@ void main() {
     final headerValues =
         (headers.first as Map<String, dynamic>)['headers'] as List<dynamic>;
 
+    expect(vercel['installCommand'], contains('3.24.5'));
     expect(rewrites.first['destination'], '/index.html');
     expect(vercel['buildCommand'], contains('--no-web-resources-cdn'));
     expect(vercel['buildCommand'], contains('--web-renderer html'));
