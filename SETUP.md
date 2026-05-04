@@ -99,12 +99,14 @@ flutter run -d chrome \
 flutter build web \
   --no-web-resources-cdn \
   --csp \
+  --pwa-strategy=none \
   --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=eyJhbGc...
 ```
 
 생성된 `build/web/` 폴더를 정적 호스팅에 업로드하면 됩니다. 위치 기능은 브라우저 보안 정책상
 HTTPS 또는 `localhost`에서만 권한 요청과 좌표 취득이 안정적으로 동작합니다.
+Vercel 배포 빌드는 stale Flutter service worker 캐시를 피하려고 `--pwa-strategy=none`을 사용합니다.
 
 ## 5. 주요 기능
 
