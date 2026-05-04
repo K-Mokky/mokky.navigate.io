@@ -35,6 +35,19 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <div
+    id="startup-status"
+    role="status"
+    aria-live="polite"
+    style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0A0E1A;color:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-align:center;z-index:2147483647;"
+  >
+    앱을 불러오는 중이에요…
+  </div>
+  <noscript>
+    <div style="padding:24px;background:#0A0E1A;color:#FFFFFF;font-family:sans-serif;">
+      이 앱을 실행하려면 JavaScript가 필요합니다.
+    </div>
+  </noscript>
   <script src="startup.js" defer></script>
 </body>
 </html>

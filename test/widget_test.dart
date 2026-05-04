@@ -118,9 +118,12 @@ void main() {
       isTrue,
     );
     expect(indexHtml, contains('<script src="startup.js" defer></script>'));
+    expect(indexHtml, contains('id="startup-status"'));
+    expect(indexHtml, contains('앱을 불러오는 중이에요'));
     expect(indexHtml, isNot(contains('navigate-sw-reset-v2')));
     expect(startupJs, contains('navigate-sw-reset-v2'));
     expect(startupJs, contains('window.location.replace'));
     expect(startupJs, contains("bootstrap.src = 'flutter_bootstrap.js'"));
+    expect(startupJs, contains('watchFlutterBoot'));
   });
 }

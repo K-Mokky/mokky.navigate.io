@@ -1,3 +1,27 @@
+const startupStatus = document.getElementById('startup-status');
+const setStartupStatus = (message) => {
+  if (startupStatus) startupStatus.textContent = message;
+};
+const watchFlutterBoot = () => {
+  const startedAt = Date.now();
+  const timer = window.setInterval(() => {
+    const flutterRoot = document.querySelector(
+      'flutter-view, flt-glass-pane, flt-scene-host',
+    );
+    if (flutterRoot) {
+      if (startupStatus) startupStatus.remove();
+      window.clearInterval(timer);
+      return;
+    }
+    if (Date.now() - startedAt > 15000) {
+      setStartupStatus(
+        '앱 로딩이 오래 걸리고 있어요. 새로고침 후에도 계속되면 Console 오류를 확인해주세요.',
+      );
+      window.clearInterval(timer);
+    }
+  }, 500);
+};
+
 (async () => {
   // This app is hosted as an always-online Flutter web app. Old Flutter
   // service workers can keep serving stale JS/font manifests while the
@@ -36,10 +60,13 @@
   bootstrap.src = 'flutter_bootstrap.js';
   bootstrap.async = true;
   document.body.appendChild(bootstrap);
+  watchFlutterBoot();
 })().catch((error) => {
   console.error('Flutter cache reset failed; loading app anyway.', error);
+  setStartupStatus('앱 캐시 정리 중 문제가 있었지만 계속 불러오는 중이에요…');
   const bootstrap = document.createElement('script');
   bootstrap.src = 'flutter_bootstrap.js';
   bootstrap.async = true;
   document.body.appendChild(bootstrap);
+  watchFlutterBoot();
 });
