@@ -82,6 +82,7 @@ void main() {
     final vercel = jsonDecode(File('vercel.json').readAsStringSync())
         as Map<String, dynamic>;
     final indexHtml = File('web/index.html').readAsStringSync();
+    final startupJs = File('web/startup.js').readAsStringSync();
     final rewrites = vercel['rewrites'] as List<dynamic>;
     final headers = vercel['headers'] as List<dynamic>;
     final headerValues =
@@ -104,8 +105,10 @@ void main() {
       headerValues.any((header) => header['key'] == 'Permissions-Policy'),
       isTrue,
     );
-    expect(indexHtml, contains('navigate-sw-reset-v2'));
-    expect(indexHtml, contains('window.location.replace'));
-    expect(indexHtml, contains("bootstrap.src = 'flutter_bootstrap.js'"));
+    expect(indexHtml, contains('<script src="startup.js" defer></script>'));
+    expect(indexHtml, isNot(contains('navigate-sw-reset-v2')));
+    expect(startupJs, contains('navigate-sw-reset-v2'));
+    expect(startupJs, contains('window.location.replace'));
+    expect(startupJs, contains("bootstrap.src = 'flutter_bootstrap.js'"));
   });
 }
