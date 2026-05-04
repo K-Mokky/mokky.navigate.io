@@ -50,3 +50,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/branding/navigateIcon.png
+  fonts:
+    - family: NotoSansKR
+      fonts:
+        - asset: assets/fonts/NotoSansKR.ttf

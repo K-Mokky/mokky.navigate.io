@@ -31,6 +31,17 @@ void main() {
     expect(SpeedUnit.mph.formatFromKmh(10), '6 mph');
   });
 
+  test('앱 테마는 웹 한국어 렌더링을 위해 번들 폰트를 사용한다', () {
+    final appSource = File('lib/app.dart').readAsStringSync();
+    final mainSource = File('lib/main.dart').readAsStringSync();
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+
+    expect(appSource, contains("fontFamily: 'NotoSansKR'"));
+    expect(mainSource, contains("fontFamily: 'NotoSansKR'"));
+    expect(pubspec, contains('assets/fonts/NotoSansKR.ttf'));
+    expect(File('assets/fonts/NotoSansKR.ttf').existsSync(), isTrue);
+  });
+
   test('인사 이벤트는 서버 RPC와 RLS로 발신자 조작을 막는다', () {
     final schema = File('supabase/schema.sql').readAsStringSync();
     final policies = File('supabase/rls_policies.sql').readAsStringSync();

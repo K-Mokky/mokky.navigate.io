@@ -21,6 +21,7 @@ class FriendTrackerApp extends StatelessWidget {
       title: '친추',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: 'NotoSansKR',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4ECDC4),
           brightness: Brightness.dark,

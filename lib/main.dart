@@ -47,7 +47,11 @@ class _MissingSupabaseConfigApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(useMaterial3: true),
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        useMaterial3: true,
+        fontFamily: 'NotoSansKR',
+      ),
       home: const Scaffold(
         backgroundColor: Color(0xFF0A0E1A),
         body: SafeArea(
