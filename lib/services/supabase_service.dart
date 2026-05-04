@@ -274,16 +274,11 @@ class SupabaseService {
 
   static Future<void> sendGreeting({
     required String recipientId,
-    required String senderName,
     required double distanceMeters,
   }) async {
-    final userId = currentUser?.id;
-    if (userId == null) return;
-    await _client.from('friend_greetings').insert({
-      'sender_id': userId,
-      'recipient_id': recipientId,
-      'sender_name': senderName,
-      'distance_meters': distanceMeters,
+    await _client.rpc('send_friend_greeting', params: {
+      'p_recipient_id': recipientId,
+      'p_distance_meters': distanceMeters,
     });
   }
 

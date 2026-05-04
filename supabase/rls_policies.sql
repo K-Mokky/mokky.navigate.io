@@ -338,19 +338,7 @@ create policy "friend_greetings_select"
 create policy "friend_greetings_insert"
   on public.friend_greetings for insert
   to authenticated
-  with check (
-    sender_id = auth.uid()
-    and exists (
-      select 1
-      from public.friendships f
-      where f.status = 'accepted'
-        and (
-          (f.requester_id = auth.uid() and f.addressee_id = recipient_id)
-          or
-          (f.addressee_id = auth.uid() and f.requester_id = recipient_id)
-        )
-    )
-  );
+  with check (false);
 
 -- ─── Avatar storage ───────────────────────────────────────
 

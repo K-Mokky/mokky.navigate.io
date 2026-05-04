@@ -181,6 +181,11 @@ begin
 end;
 $$;
 
+revoke execute on function public.send_friend_greeting(uuid, float8)
+  from public, anon;
+grant execute on function public.send_friend_greeting(uuid, float8)
+  to authenticated;
+
 drop trigger if exists profiles_update_guard on public.profiles;
 create trigger profiles_update_guard
   before update on public.profiles
@@ -265,6 +270,7 @@ as $$
     from public.room_members m
     where m.room_id = p_room_id
       and m.user_id = p_user_id
+      and auth.uid() = p_user_id
   );
 $$;
 
@@ -284,7 +290,78 @@ as $$
     where s.id = p_session_id
       and s.user_id = p_user_id
       and (p_room_id is null or s.room_id = p_room_id)
+      and auth.uid() = p_user_id
   );
+$$;
+
+-- 인사 이벤트는 클라이언트가 sender_name/거리/발신자를 임의 조작하지 못하도록
+-- RPC에서 현재 로그인 사용자와 현재 프로필 이름을 기준으로 생성한다.
+create or replace function public.send_friend_greeting(
+  p_recipient_id uuid,
+  p_distance_meters float8
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  sender_name text;
+  normalized_distance float8 := coalesce(p_distance_meters, 0);
+  greeting_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'login required';
+  end if;
+
+  if p_recipient_id is null or p_recipient_id = auth.uid() then
+    raise exception 'invalid recipient';
+  end if;
+
+  if normalized_distance < 0
+    or normalized_distance > 300 then
+    raise exception 'greeting is only allowed within proximity range';
+  end if;
+
+  if not exists (
+    select 1
+    from public.friendships f
+    where f.status = 'accepted'
+      and (
+        (f.requester_id = auth.uid() and f.addressee_id = p_recipient_id)
+        or
+        (f.addressee_id = auth.uid() and f.requester_id = p_recipient_id)
+      )
+  ) then
+    raise exception 'recipient is not an accepted friend';
+  end if;
+
+  select
+    coalesce(nullif(display_name, ''), username, '친구')
+  into sender_name
+  from public.profiles
+  where id = auth.uid();
+
+  if sender_name is null then
+    raise exception 'sender profile not found';
+  end if;
+
+  insert into public.friend_greetings (
+    sender_id,
+    recipient_id,
+    sender_name,
+    distance_meters
+  )
+  values (
+    auth.uid(),
+    p_recipient_id,
+    left(sender_name, 80),
+    normalized_distance
+  )
+  returning id into greeting_id;
+
+  return greeting_id;
+end;
 $$;
 
 -- 친구 검색은 profiles 테이블을 직접 전체 공개하지 않고 공개 필드만 반환한다.
@@ -408,6 +485,10 @@ as $$
 declare
   deleted_count integer;
 begin
+  if coalesce(auth.role(), '') in ('anon', 'authenticated') then
+    raise exception 'cleanup requires privileged execution';
+  end if;
+
   delete from public.recording_rooms
   where expires_at < now();
 
@@ -415,6 +496,9 @@ begin
   return deleted_count;
 end;
 $$;
+
+revoke execute on function public.cleanup_expired_recording_rooms()
+  from public, anon, authenticated;
 
 -- ─── Auto-populate email in profiles ───────────────────────
 -- 회원가입 시 이메일을 profiles.email로 자동 복사

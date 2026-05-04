@@ -18,6 +18,7 @@ flutter create . --platforms=web --org com.yourcompany --project-name friend_tra
 Supabase 콘솔 → **SQL Editor**에서 다음 순서로 실행:
 1. `supabase/schema.sql`
 2. `supabase/rls_policies.sql`
+3. 기존 배포 DB를 보강하는 경우 `supabase/security_hardening_20260504.sql`
 
 ### 2-3. Realtime 활성화
 Supabase 콘솔 → **Database → Replication** →  
@@ -33,6 +34,7 @@ flutter run \
 ```
 
 > 키는 Supabase 콘솔 → **Settings → API**에서 확인할 수 있습니다. `anon`/`publishable` key는 클라이언트에 포함되는 공개 키지만, 저장소에는 실제 프로젝트 값을 커밋하지 않고 RLS 정책으로 접근을 제한합니다.
+> 인사 이벤트는 클라이언트 직접 insert가 아니라 `send_friend_greeting` RPC로 생성되어 발신자 이름, 친구 관계, 거리 범위를 서버에서 검증합니다.
 
 ### 2-5. 회원가입 인증 메일 Redirect URL 설정
 

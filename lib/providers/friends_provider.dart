@@ -185,7 +185,6 @@ class FriendsProvider extends ChangeNotifier {
   }) async {
     await SupabaseService.sendGreeting(
       recipientId: recipientProfile.id,
-      senderName: senderProfile.name,
       distanceMeters: distanceMeters,
     );
     _setNotice('${recipientProfile.name}에게 인사했습니다!');
