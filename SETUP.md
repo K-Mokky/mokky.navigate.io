@@ -97,6 +97,8 @@ flutter run -d chrome \
 
 ```bash
 flutter build web \
+  --no-web-resources-cdn \
+  --csp \
   --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=eyJhbGc...
 ```

@@ -61,6 +61,8 @@ flutter run -d chrome \
 
 # 정적 웹 산출물 생성
 flutter build web \
+  --no-web-resources-cdn \
+  --csp \
   --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co \
   --dart-define=SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 ```

@@ -67,10 +67,13 @@ void main() {
         (headers.first as Map<String, dynamic>)['headers'] as List<dynamic>;
 
     expect(rewrites.first['destination'], '/index.html');
+    expect(vercel['buildCommand'], contains('--no-web-resources-cdn'));
+    expect(vercel['buildCommand'], contains('--csp'));
     expect(
       headerValues.any((header) =>
           header['key'] == 'Content-Security-Policy' &&
-          (header['value'] as String).contains("frame-ancestors 'none'")),
+          (header['value'] as String).contains("frame-ancestors 'none'") &&
+          (header['value'] as String).contains('https://www.gstatic.com')),
       isTrue,
     );
     expect(
