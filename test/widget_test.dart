@@ -79,6 +79,7 @@ void main() {
 
     expect(rewrites.first['destination'], '/index.html');
     expect(vercel['buildCommand'], contains('--no-web-resources-cdn'));
+    expect(vercel['buildCommand'], contains('--web-renderer html'));
     expect(vercel['buildCommand'], contains('--csp'));
     expect(vercel['buildCommand'], contains('--pwa-strategy=none'));
     expect(

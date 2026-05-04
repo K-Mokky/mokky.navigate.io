@@ -97,6 +97,7 @@ flutter run -d chrome \
 
 ```bash
 flutter build web \
+  --web-renderer html \
   --no-web-resources-cdn \
   --csp \
   --pwa-strategy=none \
@@ -107,6 +108,7 @@ flutter build web \
 생성된 `build/web/` 폴더를 정적 호스팅에 업로드하면 됩니다. 위치 기능은 브라우저 보안 정책상
 HTTPS 또는 `localhost`에서만 권한 요청과 좌표 취득이 안정적으로 동작합니다.
 Vercel 배포 빌드는 stale Flutter service worker 캐시를 피하려고 `--pwa-strategy=none`을 사용합니다.
+브라우저별 CanvasKit/WebGL 렌더링 편차로 인한 흰 화면이나 글자 미표시를 줄이기 위해 배포 빌드는 HTML 렌더러(`--web-renderer html`)를 사용합니다.
 
 ## 5. 주요 기능
 
@@ -122,7 +124,7 @@ Vercel 배포 빌드는 stale Flutter service worker 캐시를 피하려고 `--p
 | 위치 프라이버시 | 위치 공유 OFF 시 온라인 상태와 지도 마커/경로 노출 중단 |
 | 기록 공유 방 | 방 생성 → 링크/코드 공유 → 참가자별 기록 시작/종료 |
 | 기록 요약 | 기록 종료 시 총 이동 거리와 만난 참가자 저장 |
-| 웹 한글 폰트 | Noto Sans KR을 앱에 번들해 CanvasKit/브라우저 폰트 fallback 실패 시에도 텍스트 표시 |
+| 웹 한글 폰트 | Noto Sans KR을 앱에 번들하고 HTML 렌더러로 배포해 브라우저별 CanvasKit/WebGL 편차에서도 텍스트 표시 |
 
 ### 위치 기록 정책
 

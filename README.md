@@ -62,6 +62,7 @@ flutter run -d chrome \
 
 # 정적 웹 산출물 생성
 flutter build web \
+  --web-renderer html \
   --no-web-resources-cdn \
   --csp \
   --pwa-strategy=none \
@@ -72,5 +73,6 @@ flutter build web \
 빌드 결과는 `build/web/`에 생성되며 정적 호스팅(Netlify, Vercel, Supabase Storage 등)에 배포할 수 있습니다.
 브라우저 위치 권한은 HTTPS 또는 `localhost`에서만 정상 동작합니다.
 배포 빌드는 stale service worker 캐시로 인한 흰 화면/글자 미표시를 방지하기 위해 `--pwa-strategy=none`을 사용합니다.
+데스크톱 브라우저별 WebGL/CanvasKit 차이로 글자가 사라지는 상황을 피하려고 배포 빌드는 `--web-renderer html`을 사용합니다.
 
 > 이 저장소는 앱의 Flutter/Dart 구현과 Supabase SQL을 포함합니다. iOS 위치 권한, 백그라운드 위치 모드, FaceTime URL 스킴과 `radar://` 인증 콜백 스킴은 `ios/Runner/Info.plist`에 반영되어 있으며, `ios/Runner/Info.plist.additions.xml`은 참고용입니다.
