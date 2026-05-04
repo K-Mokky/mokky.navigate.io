@@ -58,6 +58,8 @@ void main() {
         File('supabase/security_hardening_20260504.sql').readAsStringSync();
     final rpcBackfill =
         File('supabase/rpc_backfill_20260504.sql').readAsStringSync();
+    final storageBackfill =
+        File('supabase/storage_backfill_20260504.sql').readAsStringSync();
 
     expect(schema, contains('public.send_friend_greeting'));
     expect(hardening,
@@ -73,6 +75,9 @@ void main() {
     expect(rpcBackfill, contains('public.join_room_by_code'));
     expect(rpcBackfill,
         contains('grant execute on function public.search_profiles'));
+    expect(storageBackfill, contains("values ('avatars', 'avatars', true)"));
+    expect(storageBackfill, contains('avatars_owner_insert'));
+    expect(storageBackfill, contains('storage.filename(name)'));
   });
 
   test('보조 security definer 함수는 현재 사용자 기준으로만 판정한다', () {
