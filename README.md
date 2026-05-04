@@ -43,6 +43,7 @@ Supabase SQL Editor에서 다음 순서로 실행하세요.
 1. `supabase/schema.sql`
 2. `supabase/rls_policies.sql`
 3. 기존 프로젝트를 보강할 때는 `supabase/security_hardening_20260504.sql`
+4. 기존 프로젝트에 RPC가 누락되어 있으면 `supabase/rpc_backfill_20260504.sql`
 
 실제 Supabase URL과 publishable/anon key는 `--dart-define`으로만 주입하고 저장소에는 커밋하지 않습니다.
 친구 검색과 기록방 멤버 조회는 공개 프로필 필드만 반환하도록 SQL RPC/RLS가 분리되어 있습니다.

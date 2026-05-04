@@ -19,6 +19,7 @@ Supabase 콘솔 → **SQL Editor**에서 다음 순서로 실행:
 1. `supabase/schema.sql`
 2. `supabase/rls_policies.sql`
 3. 기존 배포 DB를 보강하는 경우 `supabase/security_hardening_20260504.sql`
+4. 기존 프로젝트에 친구 검색/기록방 참여 RPC가 누락된 경우 `supabase/rpc_backfill_20260504.sql`
 
 ### 2-3. Realtime 활성화
 Supabase 콘솔 → **Database → Replication** →  
@@ -180,6 +181,8 @@ lib/
 └── widgets/         # 재사용 위젯 (마커, 속도계, 정보 시트)
 
 supabase/
-├── schema.sql       # 테이블 정의
-└── rls_policies.sql # Row Level Security
+├── schema.sql                    # 테이블 정의
+├── rls_policies.sql              # Row Level Security
+├── security_hardening_20260504.sql # 기존 DB 보안/인사 이벤트 보강
+└── rpc_backfill_20260504.sql     # 기존 DB RPC 누락 보강
 ```

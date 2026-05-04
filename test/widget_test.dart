@@ -56,6 +56,8 @@ void main() {
     final policies = File('supabase/rls_policies.sql').readAsStringSync();
     final hardening =
         File('supabase/security_hardening_20260504.sql').readAsStringSync();
+    final rpcBackfill =
+        File('supabase/rpc_backfill_20260504.sql').readAsStringSync();
 
     expect(schema, contains('public.send_friend_greeting'));
     expect(hardening,
@@ -66,6 +68,11 @@ void main() {
     expect(schema,
         contains('grant execute on function public.send_friend_greeting'));
     expect(policies, contains('with check (false)'));
+    expect(rpcBackfill, contains('public.search_profiles'));
+    expect(rpcBackfill, contains('public.get_room_members_public'));
+    expect(rpcBackfill, contains('public.join_room_by_code'));
+    expect(rpcBackfill,
+        contains('grant execute on function public.search_profiles'));
   });
 
   test('보조 security definer 함수는 현재 사용자 기준으로만 판정한다', () {
